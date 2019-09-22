@@ -11,8 +11,7 @@ class App extends Component {
     playerScore: 0,
     computerScore: 0,
     computerChoice: null,
-    bestOufOf: 3,
-    winner: 0
+    bestOutOf: 3
   };
   scoring = (playerChoice, computerChoice) => {
     const playerIndex = choices.indexOf(playerChoice);
@@ -34,33 +33,48 @@ class App extends Component {
     }
     this.setState({ playerScore: newPlayerScore });
     this.setState({ computerScore: newComputerScore });
-    if (
-      (this.bestOufOf === 3 && this.playerScore === 2) ||
-      (this.bestOutOf === 5 && this.playerScore === 3)
-    ) {
-      this.setState({ winner: 1 });
-    } else if (
-      (this.bestOufOf === 3 && this.computerScore === 2) ||
-      (this.bestOutOf === 5 && this.computerScore === 3)
-    ) {
-      this.setState({ winner: -1 });
-    }
   };
   play = playerChoice => {
-    if (this.state.winner !== 0) {
-      this.setState({ winner: 0 });
-      this.setState({ playerScore: 0 });
-      this.setState({ computerScore: 0 });
-    }
     const computerChoice = choices[Math.floor(Math.random() * choices.length)];
     this.setState({ computerChoice: computerChoice });
     this.scoring(playerChoice, computerChoice);
   };
   bestOutOf = selection => {
-    this.setState({ best: selection });
+    this.setState({ bestOutOf: Number(selection.target.value) });
   };
   display = () => {
-    if (this.state.playerScore) {
+    if (
+      (this.state.bestOutOf === 3 && this.state.playerScore >= 2) ||
+      (this.state.bestOutOf === 5 && this.state.playerScore >= 3)
+    ) {
+      return (
+        <>
+          <h1 className="my-3">YOU WIN!!</h1>
+          <button
+            className="btn btn-lg btn-danger"
+            onClick={() => this.reset()}
+          >
+            Reset
+          </button>
+        </>
+      );
+    } else if (
+      (this.state.bestOutOf === 3 && this.state.computerScore >= 2) ||
+      (this.state.bestOutOf === 5 && this.state.computerScore >= 3)
+    ) {
+      return (
+        <>
+          <h1 className="my-3">YOU LOST!! :(</h1>
+          <button
+            className="btn btn-lg btn-danger"
+            onClick={() => this.reset()}
+          >
+            Reset
+          </button>
+        </>
+      );
+    }
+    if (this.state.computerChoice) {
       return (
         <>
           <p className="my-3">Computer's choice: {this.state.computerChoice}</p>
@@ -69,24 +83,14 @@ class App extends Component {
         </>
       );
     }
-    if (this.state.winner === 1) {
-      return (
-        <>
-          <b>YOU WIN!!</b>
-        </>
-      );
-    } else if (this.state.winner === -1) {
-      return (
-        <>
-          <b>YOU LOST!! :(</b>
-        </>
-      );
-    }
+  };
+  reset = () => {
+    this.setState({ playerScore: 0, computerScore: 0 });
   };
   render() {
     let playStyleChoice = best.map(style => {
       return (
-        <option value={style} onChange={() => this.bestOutOf(style)}>
+        <option value={style} key={style}>
           {style}
         </option>
       );
@@ -96,7 +100,9 @@ class App extends Component {
         <h1>Rock, Paper, Scissors</h1>
         <h3>
           Play best out of:
-          <select className="mx-2">{playStyleChoice}</select>
+          <select className="mx-2" onChange={this.bestOutOf}>
+            {playStyleChoice}
+          </select>
         </h3>
         <Game choices={choices} play={this.play} />
         {this.display()}
